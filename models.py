@@ -1,3 +1,4 @@
+'''
 import requests
 import json
 import openai
@@ -39,3 +40,10 @@ def generate_video_from_text(text_prompt):
         return video_url
     except requests.exceptions.RequestException as e:
         return f"Error: {e}"
+'''
+from transformers import pipeline
+
+def load_classifiers():
+    classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+    scam_detector = pipeline("text-classification", model="bhadresh-savani/bert-base-uncased-emotion")
+    return classifier, scam_detector

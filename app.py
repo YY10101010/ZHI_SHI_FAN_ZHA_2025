@@ -1,8 +1,8 @@
 import streamlit as st
-from transformers import pipeline
 import openai
 import webbrowser
 import os
+from models import load_classifiers
 
 # 从环境变量中读取 API 密钥
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -11,8 +11,8 @@ st.set_page_config(page_title="智识反诈", layout="centered")
 
 # 初始化模型
 st.title("🛡️ 智识反诈：老年人反诈骗辅助系统")
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-scam_detector = pipeline("text-classification", model="bhadresh-savani/bert-base-uncased-emotion")
+
+classifier, scam_detector = load_classifiers()
 
 # 用户输入
 text = st.text_area("📩 输入聊天记录或短信内容", height=150)
