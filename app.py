@@ -1,8 +1,8 @@
 import streamlit as st
 import openai
-import webbrowser
 import os
-from models import load_classifiers
+import webbrowser
+
 
 # 设置 OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -11,26 +11,36 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 st.set_page_config(page_title="智识反诈", layout="centered")
 st.title("🛡️ 智识反诈：老年人反诈骗辅助系统")
 
-# 加载模型
-classifier, scam_detector = load_classifiers()
-
 # 用户输入
 text = st.text_area("📩 输入聊天记录或短信内容", height=150)
 
 if text:
     with st.spinner("正在分析..."):
         try:
-            pred = scam_detector(text)[0]
-            label = pred['label'].lower()
-            score = pred['score']
+            # 调用 OpenAI API 进行情感分析
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=f"Analyze the following text for emotions and detect if it's a scam: {text}",
+                max_tokens=60,
+                n=1,
+                stop=None,
+                temperature=0.5
+            )
+            result = response.choices[0].text.strip()
 
-            if score > 0.8 and label in ['anger', 'fear', 'disgust']:
-                st.error(f"⚠️ 检测到可能的诈骗内容（置信度：{score:.2f}）")
+            if "fear" in result or "anger" in result or "disgust" in result:
+                st.error(f"⚠️ 检测到可能的诈骗内容：{result}")
 
-                scam_type = classifier(
-                    text,
-                    candidate_labels=["网络购物诈骗", "虚假中奖诈骗", "假冒亲属", "投资理财诈骗"]
-                )["labels"][0]
+                # 调用 OpenAI API 进行诈骗类型识别
+                response = openai.Completion.create(
+                    engine="text-davinci-003",
+                    prompt=f"Classify the following text into scam types: {text}",
+                    max_tokens=60,
+                    n=1,
+                    stop=None,
+                    temperature=0.5
+                )
+                scam_type = response.choices[0].text.strip()
 
                 st.warning(f"🚨 疑似诈骗类型：{scam_type}")
 
