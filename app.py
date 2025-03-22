@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 import webbrowser
 import os
-from model import load_classifiers
+from models import load_classifiers
 
 # 设置 OpenAI API Key
 openai.api_key = os.getenv("OPENAI_API_KEY")
